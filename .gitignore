@@ -1,0 +1,27 @@
+# Ignorar archivos generados automáticamente
+*.meta
+*.pidb.meta
+*.pdb.meta
+*.svd.meta
+
+# Ignorar archivos temporales y de compilación
+Library/
+Temp/
+Obj/
+Build/
+Builds/
+Logs/
+Assets/AssetStoreTools*
+.vs/
+*.csproj
+*.unityproj
+*.sln
+*.suo
+*.tmp
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+sysinfo.txt
+*.apk
+*.unitypackage
