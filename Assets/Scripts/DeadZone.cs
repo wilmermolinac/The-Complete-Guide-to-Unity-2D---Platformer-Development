@@ -20,8 +20,9 @@ public class DeadZone : MonoBehaviour
         // Si el objeto que colisionó es un jugador (es decir, el componente Player no es nulo).
         if (player != null)
         {
+            player.Damage();
             // Llama al método Die del jugador para que el jugador muera.
-            player.Die();
+            //player.Die();
 
             // Pide al GameManager que vuelva a instanciar (reaparecer) un nuevo jugador.
             GameManager.instance.RespawnPlayer();

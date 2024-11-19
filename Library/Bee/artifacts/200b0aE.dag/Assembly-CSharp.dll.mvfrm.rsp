@@ -18,6 +18,8 @@ Library/Bee/artifacts/mvdfrm/Unity.2D.Tilemap.Extras.Editor.ref.dll_258B0455F8F5
 Library/Bee/artifacts/mvdfrm/Unity.2D.Tilemap.Extras.ref.dll_DD9C61FBB7D63C03.mvfrm
 Library/Bee/artifacts/mvdfrm/Unity.Burst.Editor.ref.dll_EA1A6D1CB62C8BFD.mvfrm
 Library/Bee/artifacts/mvdfrm/Unity.Burst.ref.dll_A43E80D48102A6F4.mvfrm
+Library/Bee/artifacts/mvdfrm/Unity.Cinemachine.Editor.ref.dll_E997C01F367B0A63.mvfrm
+Library/Bee/artifacts/mvdfrm/Unity.Cinemachine.ref.dll_DDA9BAC78235FA2E.mvfrm
 Library/Bee/artifacts/mvdfrm/Unity.Collections.Editor.ref.dll_94629FB7B2A83F68.mvfrm
 Library/Bee/artifacts/mvdfrm/Unity.Collections.ref.dll_CB2B1FA2A63FF8D9.mvfrm
 Library/Bee/artifacts/mvdfrm/Unity.InternalAPIEditorBridge.001.ref.dll_D33AAA747FCEED0A.mvfrm
@@ -28,6 +30,8 @@ Library/Bee/artifacts/mvdfrm/Unity.Multiplayer.Center.Common.ref.dll_70C63ADD632
 Library/Bee/artifacts/mvdfrm/Unity.Multiplayer.Center.Editor.ref.dll_6DAF32D8644B89D6.mvfrm
 Library/Bee/artifacts/mvdfrm/Unity.PlasticSCM.Editor.ref.dll_CBF917C274624EE2.mvfrm
 Library/Bee/artifacts/mvdfrm/Unity.Rider.Editor.ref.dll_A276D0F1D4D046E3.mvfrm
+Library/Bee/artifacts/mvdfrm/Unity.Splines.Editor.ref.dll_C68154F1B05DA55B.mvfrm
+Library/Bee/artifacts/mvdfrm/Unity.Splines.ref.dll_832DEAD5EAE80FB6.mvfrm
 Library/Bee/artifacts/mvdfrm/Unity.TextMeshPro.Editor.ref.dll_C5B7873C632B963A.mvfrm
 Library/Bee/artifacts/mvdfrm/Unity.TextMeshPro.ref.dll_EA61D4CF7C90DCE7.mvfrm
 Library/Bee/artifacts/mvdfrm/Unity.Timeline.Editor.ref.dll_1305DD42619CF31E.mvfrm

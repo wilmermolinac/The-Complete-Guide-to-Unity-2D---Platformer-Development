@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.Serialization;
 
 public class GameManager : MonoBehaviour
@@ -11,6 +12,14 @@ public class GameManager : MonoBehaviour
 
     // Variable estática que contendrá la instancia única del GameManager (patrón singleton).
     public static GameManager instance;
+    private UI_InGame _inGame;
+
+    [Header("Level Managment")] [SerializeField]
+    private float _levelTimer;
+
+    [SerializeField] private int _currentLevelIndex;
+
+    private int _nextLevelIndex;
 
     [Header("Player")]
     // Variable para almacenar el prefab (molde) del jugador, que se utilizará para instanciar un nuevo jugador cuando sea necesario.
@@ -55,9 +64,32 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    // Cuando se inica la Scene
     private void Start()
     {
+        // Inicializamos UI_InGame
+        _inGame = UI_InGame.instance;
+
+        // Asignamos el índice de la escena actual a la variable _currentLevelIndex
+        // SceneManager.GetActiveScene() obtiene la escena que está actualmente activa
+        // buildIndex es una propiedad de la escena activa que devuelve el índice de la escena en la lista de compilación
+        _currentLevelIndex = SceneManager.GetActiveScene().buildIndex;
+        // Desbloquemos la Scene actual
+        PlayerPrefs.SetInt(Constants.KEY_UNLOCK_LEVEL + _currentLevelIndex, 1);
+        
+        // Guarda el nivel actual
+        PlayerPrefs.SetInt(Constants.KEY_CONTINUE_NUMBER_LEVEL, _currentLevelIndex);
+
+        // obtenemos el index de la siguiente scene
+        _nextLevelIndex = _currentLevelIndex + 1;
+
         CollectFruitInfo();
+    }
+
+    private void Update()
+    {
+        _levelTimer += Time.deltaTime;
+        _inGame.UpdateTimerText(_levelTimer);
     }
 
     // Método privado para recopilar información sobre todas las frutas en la escena.
@@ -68,11 +100,23 @@ public class GameManager : MonoBehaviour
 
         // Almacena la cantidad total de frutas encontradas en la variable totalFruits.
         totalFruits = allFruits.Length;
+
+        // Guardamos el total de fruits en el nivel
+        PlayerPrefs.SetInt(Constants.KEY_TOTAL_FRUITS_LEVEL + _currentLevelIndex, totalFruits);
+
+        UpdateFruitUI();
     }
 
 
     public void RespawnPlayer()
     {
+        DifficultyManager difficultyManager = DifficultyManager.instance;
+        
+        if(difficultyManager != null && difficultyManager.difficulty == DifficultyType.Hard)
+            return;
+        
+        
+        
         // Ejecuramos una Coroutina
         StartCoroutine(RespawnPlayerCoroutine());
     }
@@ -104,6 +148,23 @@ public class GameManager : MonoBehaviour
         // Incrementa la variable 'fruitCollected' en 1.
         // Forma abreviada de 'fruitCollected = fruitCollected + 1'.
         fruitCollected++;
+        UpdateFruitUI();
+    }
+
+    public void RemoveFruit()
+    {
+        fruitCollected--;
+        _inGame.UpdateFruitUI(fruitCollected, totalFruits);
+    }
+
+    public int GetFruitCollected()
+    {
+        return fruitCollected;
+    }
+
+    private void UpdateFruitUI()
+    {
+        _inGame.UpdateFruitUI(fruitCollected, totalFruits);
     }
 
     public bool FruitHaveRandomLook()
@@ -137,4 +198,109 @@ public class GameManager : MonoBehaviour
         // Aquí podrías añadir más lógica, como modificar propiedades del nuevo objeto creado si fuera necesario.
     }
 
+    // Método que se llama cuando el jugador completa un nivel.
+    public void LevelFinished()
+    {
+        
+        SaveLevelProgress();
+
+        // Llama al método para cargar la siguiente escena.
+        LoadNextScene();
+    }
+
+
+    public void SaveLevelProgress()
+    {
+        // Marca la escena actual como completada en PlayerPrefs.
+        PlayerPrefs.SetInt(Constants.KEY_COMPLETED_LEVEL + _currentLevelIndex, 1);
+
+        // Guardamos el tiempo actual 
+        SaveBestTime();
+
+        SaveFruitsInfo();
+        
+        if (!NoMoreLevels())
+        {
+            // Desbloquea la siguiente escena en PlayerPrefs para que sea accesible.
+            PlayerPrefs.SetInt(Constants.KEY_UNLOCK_LEVEL + _nextLevelIndex, 1);
+            // Guarda el index del sigiente nivel
+            PlayerPrefs.SetInt(Constants.KEY_CONTINUE_NUMBER_LEVEL, _nextLevelIndex);
+            PlayerPrefs.SetInt(Constants.KEY_SKIN_INDEX, SkinManager.instance.GetSkinId());
+        }
+    }
+
+    private void SaveBestTime()
+    {
+        float currentBestTimeLevel = PlayerPrefs.GetFloat(Constants.KEY_BEST_TIME_LEVEL + _currentLevelIndex, 0);
+        if (_levelTimer < currentBestTimeLevel)
+        { 
+            PlayerPrefs.SetFloat(Constants.KEY_BEST_TIME_LEVEL + _currentLevelIndex, _levelTimer);
+            
+        }
+    }
+
+    private void SaveFruitsInfo()
+    {
+        int fruitCollectedLevelBefore = PlayerPrefs.GetInt(Constants.KEY_FRUIT_COLLECTED_LEVEL + _currentLevelIndex , 0);
+        if (fruitCollectedLevelBefore < fruitCollected)
+        {
+            PlayerPrefs.SetInt(Constants.KEY_FRUIT_COLLECTED_LEVEL + _currentLevelIndex, fruitCollected);
+            
+            int totalFruitsInBank = PlayerPrefs.GetInt(Constants.KEY_TOTAL_FRUITS_AMOUNT, 0);
+            totalFruitsInBank = totalFruitsInBank + fruitCollected;
+            PlayerPrefs.SetInt(Constants.KEY_TOTAL_FRUITS_AMOUNT, totalFruitsInBank);
+        }
+
+       
+    }
+
+    public void RestartLevel()
+    {
+        UI_InGame.instance.fadeEffect.ScreenFade(1,0.75f, LoadCurrentScene);
+    }
+
+    private void LoadCurrentScene()
+    {
+        SceneManager.LoadScene(Constants.KEY_NAME_LEVEL + _currentLevelIndex);
+    }
+
+// Carga la escena "TheEnd" al finalizar el último nivel.
+    private void LoadTheEndScene()
+    {
+        SceneManager.LoadScene("TheEnd");
+    }
+
+// Carga la siguiente escena de nivel.
+    private void LoadTheNextLevel()
+    {
+        SceneManager.LoadScene($"Level_{_nextLevelIndex}");
+    }
+
+// Carga la próxima escena en función de si hay niveles restantes o si es la última escena.
+    private void LoadNextScene()
+    {
+        // Referencia al efecto de desvanecimiento en pantalla de la UI.
+        Ui_FadeEffect fadeEffect = UI_InGame.instance.fadeEffect;
+
+        // Si no hay más niveles, aplica un desvanecimiento y carga la escena "TheEnd".
+        if (NoMoreLevels())
+        {
+            fadeEffect.ScreenFade(1, 1.5f, LoadTheEndScene);
+        }
+        else
+        {
+            // Si hay más niveles, aplica un desvanecimiento y carga el siguiente nivel.
+            fadeEffect.ScreenFade(1, 1.5f, LoadTheNextLevel);
+        }
+    }
+
+    private bool NoMoreLevels()
+    {
+        // Calcula el índice del último nivel disponible en el juego.
+        int lastLevelIndex = SceneManager.sceneCountInBuildSettings - 2;
+
+        // Verifica si el nivel actual es el último.
+        bool noMoreLevels = _currentLevelIndex == lastLevelIndex;
+        return noMoreLevels;
+    }
 }

@@ -32,11 +32,12 @@ public class DamageTrigger : MonoBehaviour
         // Si el componente Player no es null, significa que el objeto con el que colisionamos es el jugador.
         if (player != null)
         {
+            player.Damage();
             // Llama al método Knockback() del jugador para aplicar un efecto de retroceso.
             // y pasamos la posicion actual del game object asignado a este script
             player.Knockback(transform.position.x);
         }
-        
+
         // Tambien lo podemos hacer asi mas simplificado
         // si el Player no es nulo aplicamos el Knockback()
         //player?.Knockback();

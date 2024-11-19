@@ -4,6 +4,9 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
+    private DifficultyType _gameDifficulty;
+    private GameManager _gameManager;
+    
     private Rigidbody2D _rb; // Referencia al componente Rigidbody2D para controlar la física
 
     private Animator _anim; // Referencia al componente Animator para controlar animaciones
@@ -12,14 +15,13 @@ public class Player : MonoBehaviour
     private CapsuleCollider2D _collider;
 
     // Variables relacionadas con el movimiento
-    [Header("Movement")]
-    [SerializeField] private float _moveSpeed; // Velocidad de movimiento del jugador
+    [Header("Movement")] [SerializeField] private float _moveSpeed; // Velocidad de movimiento del jugador
     [SerializeField] private float _jumpForce; // Fuerza del salto
     [SerializeField] private float _doubleJumpForce; // Fuerza del doble salto
 
     // Variables para el buffer y el salto coyote (permitir salto poco después de salir del suelo)
-    [Header("Buffer & Coyote Jump")] [SerializeField]
-    private float
+    [Header("Buffer & Coyote Jump")] 
+    [SerializeField] private float
         _bufferJumpWindow =
             0.25f; // Tiempo durante el cual se puede realizar un salto después de presionar el botón de salto (buffer)
 
@@ -27,36 +29,44 @@ public class Player : MonoBehaviour
         _coyoteJumpWindow = 0.5f; // Tiempo que permite realizar un salto después de caer del borde (salto coyote)
 
     // Variables para interacciones con las paredes (como el salto en pared)
-    [Header("Wall Interactions")] 
-    [SerializeField] private float _wallJumpDuration = 0.6f; // Duración durante la cual se permite el salto en pared
+    [Header("Wall Interactions")] [SerializeField]
+    private float _wallJumpDuration = 0.6f; // Duración durante la cual se permite el salto en pared
 
     [SerializeField] private Vector2 _wallJumpForce; // Fuerza del salto en pared
 
     // Variables para la retroalimentación al ser golpeado (knockback)
-    [Header("Knockback")] 
-    [SerializeField] private float _knockbackDuration = 1; // Duración del knockback
+    [Header("Knockback")] [SerializeField] private float _knockbackDuration = 1; // Duración del knockback
     [SerializeField] private Vector2 _knockbackPower; // Fuerza del knockback
 
     // Variables para la detección de colisiones
-    [Header("Collision")] 
-    [SerializeField] private float _groundCheckDistance; // Distancia para detectar el suelo
+    [Header("Collision")] [SerializeField] private float _groundCheckDistance; // Distancia para detectar el suelo
     [SerializeField] private float _wallCheckDistance; // Distancia para detectar paredes
     [SerializeField] private LayerMask _whatIsGround; // Qué capas son consideradas suelo
 
-    [Space] 
-    [SerializeField] private Transform _enemyCheck; // Transform que define el punto desde donde se detectan enemigos.
+    [Space] [SerializeField]
+    private Transform _enemyCheck; // Transform que define el punto desde donde se detectan enemigos.
 
     [SerializeField] private float _enemyCheckRadius; // Radio de detección de enemigos alrededor del punto definido.
 
     [SerializeField]
     private LayerMask _whatIsEnemy; // Máscara de capa para especificar qué objetos son considerados enemigos
 
-    [Header("VFX")]
-    // Variable para almacenar el efecto visual que se mostrará cuando el Player muera.
-    // Esta variable debe ser asignada desde el inspector arrastrando el prefab del efecto visual
-    // desde la carpeta Prefabs al inspector del GameObject que contiene este script.
-    [SerializeField]
-    private GameObject _playerDeath_vfx;
+    // Este bloque se refiere a las opciones visuales del jugador.
+    // El encabezado "Player Visuals" aparecerá en el inspector para organizar las opciones visuales.
+    [Header("Player Visuals")]
+
+    // Conjunto de controladores de animación que permiten cambiar las animaciones del jugador
+    // en función de diferentes skins. Estos controladores se pueden asignar desde el inspector.
+    [SerializeField] private AnimatorOverrideController[] _animators;
+
+    // Variable que almacena el prefab del efecto visual que se mostrará cuando el jugador muera.
+    // El prefab debe asignarse arrastrándolo al inspector desde la carpeta de Prefabs.
+    // Este efecto se activa cuando el jugador pierde todas sus vidas o cuando ocurre una muerte en el juego.
+    [SerializeField] private GameObject _playerDeath_vfx;
+
+    // ID que representa la skin actual del jugador. 
+    // Inicialmente está en cero, pero puede ser modificado para cambiar el aspecto visual del jugador.
+    [SerializeField] private int skinId = 0;
 
 
     private float _bufferJumpActivated = -1; // Tiempo de activación del salto buffer
@@ -100,12 +110,54 @@ public class Player : MonoBehaviour
     {
         // Este método se llama una vez, justo antes de que comience el primer frame del juego.
         Debug.Log("Start was called");
-
         // Almacena la escala de gravedad predeterminada del Rigidbody2D, para usarla más adelante.
         _defaultGravityScale = _rb.gravityScale;
 
+        
+        _gameManager = GameManager.instance;
+        UpdateGameDifficulty();
         // Llama al método que ajusta si la reaparición (respawn) ha finalizado, desactivando el control del jugador inicialmente.
         RespawnFinished(false);
+        UpdateSkin();
+    }
+
+    public void Damage()
+    {
+        if (_gameDifficulty == DifficultyType.Normal)
+        {
+            if (_gameManager.GetFruitCollected() <= 0)
+            {
+                // Llama al método Die del jugador para que el jugador muera.
+                Die();
+                // Restart level
+                _gameManager.RestartLevel();
+            }
+            else
+            {
+                _gameManager.RemoveFruit();
+            }
+            return;
+        }
+
+        if (_gameDifficulty == DifficultyType.Hard)
+        {
+            // Llama al método Die del jugador para que el jugador muera.
+            Die();
+            
+            // Restart level
+            _gameManager.RestartLevel();
+        }
+        
+        
+    }
+
+    private void UpdateGameDifficulty()
+    {
+        DifficultyManager difficultyManager = DifficultyManager.instance;
+        if (difficultyManager != null)
+        {
+            _gameDifficulty = DifficultyManager.instance.difficulty;
+        }
     }
 
     // Método Update se llama una vez por cada frame, actualizando constantemente el estado del jugador.
@@ -140,6 +192,23 @@ public class Player : MonoBehaviour
         HandleFlip(); // Gestiona el volteo del sprite del jugador basado en la dirección en la que se está moviendo.
         HandleCollisions(); // Detecta y maneja las colisiones con otros objetos.
         HandleAnimations(); // Actualiza las animaciones del jugador basadas en su estado actual (correr, saltar, caer, etc.).
+    }
+
+    // Método para actualizar el skin en el juego.
+    public void UpdateSkin()
+    {
+        // Obtiene la instancia de SkinManager.
+        SkinManager skinManager = SkinManager.instance;
+
+        // Verifica si el SkinManager existe antes de proceder.
+        if (skinManager == null)
+            return;
+
+        // Obtiene el ID de la skin seleccionada del SkinManager.
+        skinId = skinManager.GetSkinId();
+
+        // Asigna el controlador de animación correspondiente al ID de la skin seleccionada.
+        _anim.runtimeAnimatorController = _animators[skinId];
     }
 
     // Método para detectar enemigos y manejar la colisión con ellos.
@@ -218,6 +287,8 @@ public class Player : MonoBehaviour
         {
             return; // Si ya está en knockback, no hace nada y se sale del método.
         }
+        
+        CameraManager.instance.ScreenShake(knockbackDir);
 
         // Inicia una corrutina que manejará el estado del knockback durante un tiempo determinado.
         StartCoroutine(KnockbackCoroutine());

@@ -25,6 +25,8 @@ public class Finshed : MonoBehaviour
 
             // Imprime un mensaje en la consola de Unity indicando que el jugador completó el nivel.
             Debug.Log("You completed the level!");
+
+            GameManager.instance.LevelFinished();
         }
     }
 }
