@@ -44,9 +44,11 @@ public class UI_InGame : MonoBehaviour
         }
     }
 
+    // Se llama desde el evento onClick() del MainMenu button
     public void GoToMainMenuBtn()
     {
         SceneManager.LoadScene(0); // Carga el menú principal.
+        AudioManager.instance.PlaySfx(4);
     }
 
     public void PauseBtn()
@@ -63,6 +65,9 @@ public class UI_InGame : MonoBehaviour
             Time.timeScale = 0; // Pausa el tiempo.
             _pauseMenuUI.SetActive(true);
         }
+
+        AudioManager.instance.PlaySfx(4);
+
     }
 
     public void UpdateFruitUI(int collectedFruits, int totalFruits)

@@ -44,5 +44,7 @@ public class Ui_LevelButton : MonoBehaviour
 
         // Carga la escena correspondiente.
         SceneManager.LoadScene(sceneName);
+
+        AudioManager.instance.PlaySfx(4);
     }
 }

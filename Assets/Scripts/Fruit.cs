@@ -85,6 +85,8 @@ public class Fruit : MonoBehaviour
             // Incrementa el contador de frutas recogidas a través del GameManager.
             _gameManager.AddFruit();
 
+            AudioManager.instance.PlaySfx(8);
+            
             // Destruye el GameObject de la fruta inmediatamente tras ser recogida.
             Destroy(this.gameObject);
 

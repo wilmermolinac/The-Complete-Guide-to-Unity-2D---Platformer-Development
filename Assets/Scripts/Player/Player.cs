@@ -231,6 +231,8 @@ public class Player : MonoBehaviour
 
             if (currentEnemy != null)
             {
+                AudioManager.instance.PlaySfx(1);
+                
                 // Si el objeto colisionado es un enemigo, ejecuta su método Die() y hace que el jugador salte.
                 currentEnemy.Die();
                 Jump();
@@ -238,7 +240,7 @@ public class Player : MonoBehaviour
         }
     }
 
-// Este método gestiona lo que sucede cuando la reaparición (respawn) ha terminado o no.
+    // Este método gestiona lo que sucede cuando la reaparición (respawn) ha terminado o no.
     // Recibe un parámetro booleano 'finished', que indica si la reaparición ha finalizado.
     public void RespawnFinished(bool finished)
     {
@@ -255,6 +257,8 @@ public class Player : MonoBehaviour
 
             // Habilita el collider del jugador, permitiéndole interactuar con otros objetos.
             _collider.enabled = true;
+            
+            AudioManager.instance.PlaySfx(11);
         }
         else
         {
@@ -319,9 +323,11 @@ public class Player : MonoBehaviour
     // Método público que destruye el GameObject actual (el objeto que tiene este script).
     public void Die()
     {
+        AudioManager.instance.PlaySfx(0);
+        
         // Instancia el efecto visual de muerte en la posición actual del objeto y con la rotación por defecto (sin rotación).
         GameObject newDeathVfx = Instantiate(_playerDeath_vfx, this.transform.position, Quaternion.identity);
-
+        
         // Elimina el objeto actual (por ejemplo, el Player) de la escena, liberando memoria y recursos asociados.
         Destroy(this.gameObject);
     }
@@ -468,12 +474,15 @@ public class Player : MonoBehaviour
 
     private void Jump()
     {
+        AudioManager.instance.PlaySfx(3);
         // Cambia la velocidad vertical del personaje al valor de _jumpForce, manteniendo la velocidad horizontal
         _rb.linearVelocity = new Vector2(_rb.linearVelocity.x, _jumpForce);
     }
 
     private void DoubleJump()
     {
+        AudioManager.instance.PlaySfx(3);
+
         // Desactiva el estado de salto en la pared (por si estuviera activado)
         _isWallJumping = false;
 
@@ -486,6 +495,8 @@ public class Player : MonoBehaviour
 
     private void WallJump()
     {
+        AudioManager.instance.PlaySfx(12);
+        
         // Aplica la fuerza de salto en la pared en ambas direcciones: horizontal (según el lado al que mire el personaje) y vertical
         _rb.linearVelocity = new Vector2(_wallJumpForce.x * _facingDir, _wallJumpForce.y);
 

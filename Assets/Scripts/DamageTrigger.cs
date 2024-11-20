@@ -36,6 +36,8 @@ public class DamageTrigger : MonoBehaviour
             // Llama al método Knockback() del jugador para aplicar un efecto de retroceso.
             // y pasamos la posicion actual del game object asignado a este script
             player.Knockback(transform.position.x);
+
+            AudioManager.instance.PlaySfx(9, false);
         }
 
         // Tambien lo podemos hacer asi mas simplificado

@@ -19,5 +19,9 @@ public static class Constants
    public const string KEY_DIFFICULTY_INDEX = "Difficulty_Index";
    
    public const string KEY_SKIN_INDEX = "SkinsIndex";
-      
+   
+   // Settings
+   public const string KEY_SFXPARAMETER_VALUE = "SfxParameter_value";
+   public const string KEY_BGMPARAMETER_VALUE = "BgmParameter_value";
+
 }

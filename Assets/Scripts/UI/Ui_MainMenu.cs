@@ -51,12 +51,14 @@ public class Ui_MainMenu : MonoBehaviour
         }
 
         uiToEnable.SetActive(true); // Activa el elemento especificado.
+        AudioManager.instance.PlaySfx(4);
     }
 
     // Inicia un nuevo juego cargando la primera escena del nivel.
     public void NewGame()
     {
         _fadeEffect.ScreenFade(1, 1.5f, LoadLevelScene); // Desvanece antes de cargar la escena.
+        AudioManager.instance.PlaySfx(4);
     }
 
     // Carga la escena del primer nivel.
@@ -82,6 +84,8 @@ public class Ui_MainMenu : MonoBehaviour
         DifficultyManager.instance.LoadDifficulty(difficultyIndex); // Configura la dificultad.
 
         SceneManager.LoadScene(Constants.KEY_NAME_LEVEL + continueSceneIndex); // Carga la escena guardada.
+        
+        AudioManager.instance.PlaySfx(4);
     }
 
     // Mueve la cámara al menú principal.

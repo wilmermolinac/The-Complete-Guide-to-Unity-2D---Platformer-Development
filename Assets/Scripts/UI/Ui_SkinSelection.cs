@@ -75,6 +75,7 @@ public class Ui_SkinSelection : MonoBehaviour
         }
         
         UpdateSkinDisplay(); // Actualiza la interfaz después de realizar una acción.
+        AudioManager.instance.PlaySfx(4);
     }
 
     // Avanza al siguiente skin en la lista.
@@ -82,6 +83,7 @@ public class Ui_SkinSelection : MonoBehaviour
     {
         _skinIndex = (_skinIndex + 1) % (_maxIndex + 1); // Incrementa y reinicia al llegar al máximo.
         UpdateSkinDisplay(); // Actualiza la interfaz para reflejar el cambio.
+        AudioManager.instance.PlaySfx(4);
     }
 
     // Retrocede al skin anterior en la lista.
@@ -89,6 +91,7 @@ public class Ui_SkinSelection : MonoBehaviour
     {
         _skinIndex = (_skinIndex - 1 + (_maxIndex + 1)) % (_maxIndex + 1); // Decrementa y reinicia al llegar al mínimo.
         UpdateSkinDisplay(); // Actualiza la interfaz para reflejar el cambio.
+        AudioManager.instance.PlaySfx(4);
     }
 
     // Actualiza la interfaz para mostrar la información del skin seleccionado.
@@ -128,6 +131,7 @@ public class Ui_SkinSelection : MonoBehaviour
             skinList[skinIndex].unlocked = true; // Marca el skin como desbloqueado.
             PlayerPrefs.SetInt(Constants.KEY_UNLOCKED_SKIN_INDEX + skinIndex, 1); // Guarda el estado en PlayerPrefs.
         }
+        AudioManager.instance.PlaySfx(4);
     }
 
     // Obtiene la cantidad de monedas/frutas disponibles del jugador.
@@ -141,9 +145,15 @@ public class Ui_SkinSelection : MonoBehaviour
     {
         if (GetFruitInBank() >= skinPrice)
         {
+            AudioManager.instance.PlaySfx(10, false);
             PlayerPrefs.SetInt(Constants.KEY_TOTAL_FRUITS_AMOUNT, GetFruitInBank() - skinPrice); // Descuenta el precio.
             return true; // Transacción exitosa.
         }
-        return false; // Transacción fallida por falta de monedas.
+        else
+        {
+            AudioManager.instance.PlaySfx(6, false);
+            return false;// Transacción fallida por falta de monedas.
+        }
+       
     }
 }

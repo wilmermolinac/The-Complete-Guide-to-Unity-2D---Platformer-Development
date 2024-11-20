@@ -23,6 +23,8 @@ public class Finshed : MonoBehaviour
             // Dispara una animación configurada por el trigger "isActivate".
             _anim.SetTrigger("isActivate");
 
+            AudioManager.instance.PlaySfx(2);
+
             // Imprime un mensaje en la consola de Unity indicando que el jugador completó el nivel.
             Debug.Log("You completed the level!");
 
